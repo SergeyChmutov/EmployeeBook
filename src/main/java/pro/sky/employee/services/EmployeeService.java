@@ -8,6 +8,7 @@ import pro.sky.employee.exceptions.EmployeeNotValidNameException;
 import pro.sky.employee.interfaces.EmployeeServiceInterface;
 import pro.sky.employee.models.Employee;
 
+import java.security.InvalidParameterException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,7 +20,7 @@ public class EmployeeService implements EmployeeServiceInterface {
 
     @Override
     public Employee add(String firstName, String lastName, Integer salary, Integer department) {
-        checkValidNames(firstName, lastName);
+        checkValidParameters(firstName, lastName, salary, department);
         String fullName = StringUtils.capitalize(firstName) + StringUtils.capitalize(lastName);
         Employee employee = employees.get(fullName);
         if (employee == null) {
@@ -57,10 +58,20 @@ public class EmployeeService implements EmployeeServiceInterface {
         return Collections.unmodifiableCollection(employees.values());
     }
 
+    private void checkValidParameters(String firstName, String lastName, Integer salary, Integer department) {
+        checkValidNames(firstName, lastName);
+        if (salary == null || salary <= 0) {
+            throw new IllegalArgumentException("Не задано или некорректно задано значение оклада");
+        }
+        if (department == null || department <= 0) {
+            throw new IllegalArgumentException("Не задано или некорректно задано значение номера отдела");
+        }
+    }
+
     private void checkValidNames(String... names) {
         for (String name : names) {
             if (!StringUtils.isAlpha(name)) {
-                throw new EmployeeNotValidNameException("Строка имени/фамилии должна содержать только символы");
+                throw new EmployeeNotValidNameException("Имя/фамилия должны быть указаны и содержать только символы");
             }
         }
     }
